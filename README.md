@@ -10,3 +10,4 @@
 - Change 'playlist' to the name of the playlist that contains all of the songs you want to sync. 
   - All other playlist files will be copied to the folder so that you can use them in your music player, but only the specified playlist file is used to determine which songs will be synced. 
 - Run the script using the terminal. 
+  - Change directory to the folder containing the script, and type python sync-itunes-android.py
