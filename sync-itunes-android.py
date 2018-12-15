@@ -1,4 +1,5 @@
-import fileinput, shutil, os, time
+import shutil, os, time
+from io import open
 
 # # Make Paths
 dest = '/Volumes/SD Card/Music/'
@@ -14,7 +15,8 @@ def mkdir(path):
 			os.mkdir(p)
 
 fileSet = set()
-data = [l.strip().split('/') for l in fileinput.input(playlist) if l[0] != '#']
+with open(playlist, 'rU', encoding = 'utf-8') as file:
+	data = [l.strip().split('/') for l in file.read().split('\n') if len(l) > 0 and l[0] != '#']
 source = '/'.join(data[0][:-3]) + '/'
 timey = time.time()
 for i, path in enumerate(data):
@@ -38,11 +40,11 @@ print(len(fileSet), time.time() - timey)
 for filename in os.listdir('.'):
 	if 'm3u' in filename:
 		# Read and replace source paths
-		with open(filename) as file:
+		with open(filename, 'rU', encoding = 'utf-8') as file:
 			data = file.read().replace(source, '')
 		fileSet.add(filename.lower())
 		# Write Out
-		with open(filename, 'w') as output:
+		with open(filename, 'w', encoding = 'utf-8') as output:
 			output.write(data)
 
 # # Clean Up
