@@ -1,5 +1,8 @@
-import shutil, os, time
+import shutil, os, time, unicodedata, filecmp
 from io import open
+
+timey = time.time()
+os.chdir(os.path.dirname(__file__))
 
 # # Make Paths
 dest = '/Volumes/SD Card/Music/'
@@ -14,24 +17,27 @@ def mkdir(path):
 		if not os.path.exists(p):
 			os.mkdir(p)
 
-fileSet = set()
 with open(playlist, 'rU', encoding = 'utf-8') as file:
 	data = [l.strip().split('/') for l in file.read().split('\n') if len(l) > 0 and l[0] != '#']
-source = '/'.join(data[0][:-3]) + '/'
-timey = time.time()
+fileSet = set()
+source = '/'.join(data[0][:-3])+'/'
 for i, path in enumerate(data):
 	# Make Source and Destination Names
 	s = '/'.join(path)
-	d = dest+'/'.join(path[-3:])
-	# Other Stuff
+	# Encode is required for Python 2
+	p = '/'.join(path[-3:])#.encode('utf-8')
+	d = dest + p
+	# Fat32 Can't handle composed unicode characters, must be decomposed
+	d = unicodedata.normalize('NFD', d) if os.path.exists('/Volumes/SD Card/') else d
+	# Keep track of files, print progress
 	fileSet.add(d.lower())
-	if i % 500 == 0:
+	if i % 100 == 0:
 		print(i, time.time() - timey)
 	# Copy File
-	mkdir(path[-3:])
-	if not os.path.exists(d):
+	if not os.path.exists(d) or not filecmp.cmp(s, d):
+		mkdir(path[-3:])
 		if printUpdates:
-			print(d)
+			print(i, p)
 		shutil.copy2(s, d)
 
 print(len(fileSet), time.time() - timey)
@@ -54,18 +60,19 @@ for folder in os.walk(dest):
 		path = (folder[0]+'/'+file).replace('//', '/')
 		if path.lower() not in fileSet:
 			try:
-				os.remove(path)
 				print(path)
+				os.remove(path)
 			except Exception:
-				pass
+				print('failed', path)
 
-# Once for album, once for artist
+# Remove folders. Once for album, once for artist
 for i in range(2):
 	for folder in os.walk(dest):
 		if folder[1:] == ([], []):
 			os.rmdir(folder[0])
 			print(folder[0])
 
-# # Check
+# # Check File Count
 files = [file for path in os.walk(dest) for file in path[2]]
-print(len(fileSet), len(files))
+assert len(fileSet) == len(files)
+print(len(fileSet), len(files), time.time() - timey)
