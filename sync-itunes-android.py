@@ -55,9 +55,9 @@ for filename in os.listdir('.'):
 			data = file.read()
 		'''
 		Contents: 
+		Android VLC requires precomposed unicode
 		Filter songs not in main playlist
 		Replace source paths
-		Android VLC requires precomposed unicode
 		Android VLC requires url encoding
 		'''
 		data = unicodedata.normalize('NFC', data)
