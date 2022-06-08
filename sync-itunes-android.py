@@ -1,4 +1,4 @@
-import shutil, os, time, unicodedata, filecmp
+import shutil, os, time, unicodedata, filecmp, urllib.parse, tqdm
 from io import open
 
 timey = time.time()
@@ -9,7 +9,7 @@ dest = '/Volumes/SD Card/Music/'
 playlist = 'My Playlist.m3u'
 printUpdates = os.path.exists(dest)
 
-# # Copy Music
+# # Copy Music Folder
 def mkdir(path):
 	# Excludes the last item i.e. the file
 	for i in range(len(path)):
@@ -17,22 +17,27 @@ def mkdir(path):
 		if not os.path.exists(p):
 			os.mkdir(p)
 
+# Read play list, exclude blank lines and comments
 with open(playlist, 'rU', encoding = 'utf-8') as file:
-	data = [l.strip().split('/') for l in file.read().split('\n') if len(l) > 0 and l[0] != '#']
+	playlistContents = file.read()
+data = [l.strip().split('/') for l in playlistContents.split('\n') if len(l) > 0 and l[0] != '#']
+playlistContents2 = unicodedata.normalize('NFC', playlistContents)
+playlistSet = {l.strip() for l in playlistContents2.split('\n#')}
 fileSet = set()
+# Get source folder
 source = '/'.join(data[0][:-3])+'/'
-for i, path in enumerate(data):
+for i, path in tqdm.tqdm(enumerate(data), total = len(data)):
 	# Make Source and Destination Names
 	s = '/'.join(path)
 	# Encode is required for Python 2
 	p = '/'.join(path[-3:])#.encode('utf-8')
 	d = dest + p
-	# Fat32 Can't handle composed unicode characters, must be decomposed
+	# Fat32 and EXFAT can't handle composed unicode characters, must be decomposed
 	d = unicodedata.normalize('NFD', d) if os.path.exists('/Volumes/SD Card/') else d
 	# Keep track of files, print progress
 	fileSet.add(d.lower())
-	if i % 100 == 0:
-		print(i, time.time() - timey)
+	# if i % 100 == 0:
+	# 	print(i, time.time() - timey)
 	# Copy File
 	if not os.path.exists(d) or not filecmp.cmp(s, d):
 		mkdir(path[-3:])
@@ -45,9 +50,21 @@ print(len(fileSet), time.time() - timey)
 # # Copy Playlists
 for filename in os.listdir('.'):
 	if 'm3u' in filename:
-		# Read and replace source paths
+		# Read
 		with open(filename, 'rU', encoding = 'utf-8') as file:
-			data = file.read().replace(source, '')
+			data = file.read()
+		'''
+		Contents: 
+		Filter songs not in main playlist
+		Replace source paths
+		Android VLC requires precomposed unicode
+		Android VLC requires url encoding
+		'''
+		data = unicodedata.normalize('NFC', data)
+		data = '\n#'.join([l.strip() for l in data.split('\n#') if l.strip() in playlistSet])
+		data = data.replace(source, '')
+		data = '\n'.join([line if line and line[0] == '#' else urllib.parse.quote(line) for line in data.split('\n')])
+		# Update fileSet
 		fileSet.add(filename.lower())
 		# Write Out
 		with open(filename, 'w', encoding = 'utf-8') as output:
