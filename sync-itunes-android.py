@@ -36,18 +36,18 @@ for i, path in tqdm.tqdm(enumerate(data), total = len(data)):
 	d = dest + p
 	# Fat32 and EXFAT can't handle composed unicode characters, must be decomposed
 	d = unicodedata.normalize('NFD', d) if os.path.exists('/Volumes/SD Card/') else d
-	# Keep track of files, print progress
-	fileSet.add(d.lower())
-	# if i % 100 == 0:
-	# 	print(i, time.time() - timey)
-	# Copy File
-	if not os.path.exists(d) or (checkContents and not filecmp.cmp(s, d)):
-		if not writeFiles:
-			continue
-		mkdir(path[-3:])
-		if printUpdates:
-			print(i, p)
-		shutil.copy2(s, d)
+	if writeFiles:
+		# Keep track of files, print progress
+		fileSet.add(d.lower())
+		# if i % 100 == 0:
+		# 	print(i, time.time() - timey)
+		# Copy File
+		if not os.path.exists(d) or (checkContents and not filecmp.cmp(s, d)):
+			mkdir(path[-3:])
+			if printUpdates:
+				print(i, p)
+			shutil.copy2(s, d)
+
 
 print(len(fileSet), time.time() - timey)
 
