@@ -8,6 +8,10 @@ os.chdir(os.path.dirname(__file__))
 dest = '/Volumes/SD Card/Music/'
 playlist = 'My Playlist.m3u'
 printUpdates = os.path.exists(dest)
+# Enable Writing New Files
+writeFiles = False
+# Enable Checking If Contents of Files Have Changed (Slower)
+checkContents = False
 
 # # Copy Music Folder
 def mkdir(path):
@@ -21,8 +25,6 @@ def mkdir(path):
 with open(playlist, 'rU', encoding = 'utf-8') as file:
 	playlistContents = file.read()
 data = [l.strip().split('/') for l in playlistContents.split('\n') if len(l) > 0 and l[0] != '#']
-playlistContents2 = unicodedata.normalize('NFC', playlistContents)
-playlistSet = {l.strip() for l in playlistContents2.split('\n#')}
 fileSet = set()
 # Get source folder
 source = '/'.join(data[0][:-3])+'/'
@@ -39,7 +41,9 @@ for i, path in tqdm.tqdm(enumerate(data), total = len(data)):
 	# if i % 100 == 0:
 	# 	print(i, time.time() - timey)
 	# Copy File
-	if not os.path.exists(d) or not filecmp.cmp(s, d):
+	if not os.path.exists(d) or (checkContents and not filecmp.cmp(s, d)):
+		if not writeFiles:
+			continue
 		mkdir(path[-3:])
 		if printUpdates:
 			print(i, p)
@@ -48,6 +52,9 @@ for i, path in tqdm.tqdm(enumerate(data), total = len(data)):
 print(len(fileSet), time.time() - timey)
 
 # # Copy Playlists
+# Main playlist set
+playlistContents2 = unicodedata.normalize('NFC', playlistContents)
+playlistSet = {l.strip() for l in playlistContents2.split('\n#')}
 for filename in os.listdir('.'):
 	if 'm3u' in filename:
 		# Read
@@ -56,7 +63,7 @@ for filename in os.listdir('.'):
 		'''
 		Contents: 
 		Android VLC requires precomposed unicode
-		Filter songs not in main playlist
+		Filter songs not in main playlist (In Android VLC, playlists cannot point to non-existent files)
 		Replace source paths
 		Android VLC requires url encoding
 		'''
