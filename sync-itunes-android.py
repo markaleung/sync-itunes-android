@@ -26,28 +26,39 @@ with open(playlist, 'rU', encoding = 'utf-8') as file:
 	playlistContents = file.read()
 data = [l.strip().split('/') for l in playlistContents.split('\n') if len(l) > 0 and l[0] != '#']
 fileSet = set()
-# Get source folder
-source = '/'.join(data[0][:-3])+'/'
-for i, path in tqdm.tqdm(enumerate(data), total = len(data)):
-	# Make Source and Destination Names
-	s = '/'.join(path)
-	# Encode is required for Python 2
-	p = '/'.join(path[-3:])#.encode('utf-8')
-	d = dest + p
-	# Fat32 and EXFAT can't handle composed unicode characters, must be decomposed
-	d = unicodedata.normalize('NFD', d) if os.path.exists('/Volumes/SD Card/') else d
-	if writeFiles:
+
+class Copier:
+
+	def makePaths(self, i, path):
+		self.i = i
+		self.path = path
+		# Make Source and Destination Names
+		self.s = '/'.join(path)
+		# Encode is required for Python 2
+		self.p = '/'.join(path[-3:])#.encode('utf-8')
+		self.d = dest + self.p
+		# Fat32 and EXFAT can't handle composed unicode characters, must be decomposed
+		self.d = unicodedata.normalize('NFD', self.d) if os.path.exists('/Volumes/SD Card/') else self.d
+
+	def copy(self):
 		# Keep track of files, print progress
-		fileSet.add(d.lower())
+		fileSet.add(self.d.lower())
 		# if i % 100 == 0:
 		# 	print(i, time.time() - timey)
 		# Copy File
-		if not os.path.exists(d) or (checkContents and not filecmp.cmp(s, d)):
-			mkdir(path[-3:])
+		if not os.path.exists(self.d) or (checkContents and not filecmp.cmp(self.s, self.d)):
+			mkdir(self.path[-3:])
 			if printUpdates:
-				print(i, p)
-			shutil.copy2(s, d)
+				print(self.i, self.p)
+			shutil.copy2(self.s, self.d)
 
+# Get source folder
+source = '/'.join(data[0][:-3])+'/'
+for i, path in tqdm.tqdm(enumerate(data), total = len(data)):
+	myCopier = Copier()
+	myCopier.makePaths(i, path)
+	if writeFiles:
+		myCopier.copy()
 
 print(len(fileSet), time.time() - timey)
 
@@ -55,11 +66,17 @@ print(len(fileSet), time.time() - timey)
 # Main playlist set
 playlistContents2 = unicodedata.normalize('NFC', playlistContents)
 playlistSet = {l.strip() for l in playlistContents2.split('\n#')}
-for filename in os.listdir('.'):
-	if 'm3u' in filename:
+
+class Playlist:
+
+	def read(self, folder, filename):
+		self.folder = folder
+		self.filename = filename
 		# Read
-		with open(filename, 'rU', encoding = 'utf-8') as file:
-			data = file.read()
+		with open(folder+'/'+filename, 'rU', encoding = 'utf-8') as file:
+			self.data = file.read()
+
+	def getContents(self):
 		'''
 		Contents: 
 		Android VLC requires precomposed unicode
@@ -67,15 +84,32 @@ for filename in os.listdir('.'):
 		Replace source paths
 		Android VLC requires url encoding
 		'''
-		data = unicodedata.normalize('NFC', data)
-		data = '\n#'.join([l.strip() for l in data.split('\n#') if l.strip() in playlistSet])
-		data = data.replace(source, '')
-		data = '\n'.join([line if line and line[0] == '#' else urllib.parse.quote(line) for line in data.split('\n')])
-		# Update fileSet
-		fileSet.add(filename.lower())
+		self.data = unicodedata.normalize('NFC', self.data)
+		self.data = '\n#'.join([l.strip() for l in self.data.split('\n#') if l.strip() in playlistSet])
+		self.data = self.data.replace(source, '')
+		self.data = '\n'.join([line if line and line[0] == '#' else urllib.parse.quote(line) for line in self.data.split('\n')])
+
+	def getFilename(self):
+		# Make New Filename
+		self.filename = f'{dest}{self.folder} {self.filename}8'
+		fileSet.add(self.filename.lower())
+
+	def write(self):
+		# Print New Playlists
+		if not os.path.exists(self.filename) and printUpdates:
+			print(self.filename)
 		# Write Out
-		with open(filename, 'w', encoding = 'utf-8') as output:
-			output.write(data)
+		with open(self.filename, 'w', encoding = 'utf-8') as output:
+			output.write(self.data)
+
+for folder in ['.']:
+	for filename in os.listdir(folder):
+		if 'm3u' in filename:
+			myPlaylist = Playlist()
+			myPlaylist.read(folder, filename)
+			myPlaylist.getContents()
+			myPlaylist.getFilename()
+			myPlaylist.write()
 
 # # Clean Up
 # Remove Deleted Songs
