@@ -1,19 +1,22 @@
-import shutil, os, time, unicodedata, filecmp, urllib.parse, tqdm
+import shutil, os, time, unicodedata, urllib.parse, tqdm
+import Copier
 from io import open
 
-timey = time.time()
 os.chdir(os.path.dirname(__file__))
 
 # # Make Paths
 dest = '/Volumes/SD Card/Music/'
 playlist = 'My Playlist.m3u'
-printUpdates = os.path.exists(dest)
-# Enable Writing New Files
-writeFiles = True
-# Enable Checking If Contents of Files Have Changed (Slower)
-checkContents = True
-# Use progress bar or print every 100 files
-progressBar = False
+config = {
+    'printUpdates': os.path.exists(dest), 
+    # Enable Writing New Files
+    'writeFiles': True, 
+    # Enable Checking If Contents of Files Have Changed (Slower)
+    'checkContents': True, 
+    # Use progress bar or print every 100 files
+    'progressBar': False, 
+    'timey': time.time()
+}
 
 # # Copy Music Folder
 # Read play list, exclude blank lines and comments
@@ -22,63 +25,24 @@ with open(playlist, encoding = 'utf-8') as file:
 data = [l.strip().split('/') for l in playlistContents.split('\n') if len(l) > 0 and l[0] != '#']
 fileSet = set()
 
-class Copier:
-
-    def __init__(self, i, path):
-        self.i = i
-        self.path = path
-
-    def makePaths(self):
-        # Make Source and Destination Names
-        self.source = '/'.join(self.path)
-        # Encode is required for Python 2
-        self.short = '/'.join(self.path[-3:])#.encode('utf-8')
-        self.dest = dest + self.short
-        # Fat32 and EXFAT can't handle composed unicode characters, must be decomposed
-        self.dest = unicodedata.normalize('NFD', self.dest) if os.path.exists('/Volumes/SD Card/') else self.dest
-
-    def check(self):
-        # Keep track of files
-        fileSet.add(self.dest.lower())
-        return not os.path.exists(self.dest) or (
-            checkContents and
-            not filecmp.cmp(self.source, self.dest)
-        )
-
-    def mkdir(self):
-        # Excludes the last item i.e. the file
-        path = self.path[-3:]
-        for i in range(len(path)):
-            p = dest + '/'.join(path[:i])
-            if not os.path.exists(p):
-                os.mkdir(p)
-
-    def copy(self):
-        # Copy File
-        if printUpdates:
-            print(self.i, self.short)
-        shutil.copy2(self.source, self.dest)
-
-    def progress(self):
-        # print progress
-        if self.i % 100 == 0:
-            print(i, time.time() - timey)
-
 # Get source folder
 source = '/'.join(data[0][:-3])+'/'
 iterator = enumerate(data)
-if progressBar:
+if config['progressBar']:
     iterator = tqdm.tqdm(iterator, total = len(data))
+# Copy each file
+myCopier = Copier.Copier(dest, config)
 for i, path in iterator:
-    myCopier = Copier(i, path)
+    myCopier.start(i, path)
     myCopier.makePaths()
-    if writeFiles and myCopier.check():
+    if config['writeFiles'] and myCopier.check():
         myCopier.mkdir()
         myCopier.copy()
-    if not progressBar:
+    if not config['progressBar']:
         myCopier.progress()
 
-print(len(fileSet), time.time() - timey)
+fileSet |= myCopier.fileSet
+print(len(fileSet), time.time() - config['timey'])
 
 # # Copy Playlists
 # Main playlist set
@@ -153,4 +117,4 @@ for i in range(2):
 # # Check File Count
 files = [file for path in os.walk(dest) for file in path[2]]
 assert len(fileSet) == len(files)
-print(len(fileSet), len(files), time.time() - timey)
+print(len(fileSet), len(files), time.time() - config['timey'])
