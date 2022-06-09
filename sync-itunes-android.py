@@ -11,19 +11,11 @@ config = {
     'checkContents': True, 
     # Use progress bar or print every 100 files
     'progressBar': True, 
-    'timey': time.time()
+    'timey': time.time(), 
+    'dest': '/Volumes/SD Card/Music/', 
+    'playlist': 'My Playlist.m3u', 
 }
-if os.path.exists('/Volumes/SD Card/'):
-    config.update({
-        'dest': '/Volumes/SD Card/Music/', 
-        'playlist': 'Workflow/Shuffle Source.m3u', 
-    })
-else:
-    config.update({
-        'dest': '/Users/mark/Desktop/Music/', 
-        'playlist': 'Workflow/A Scratch 2.m3u', 
-    })
-    config['printUpdates'] = os.path.exists(config['dest'])
+config['printUpdates'] = os.path.exists(config['dest'])
 
 class Sync:
 
@@ -68,7 +60,7 @@ class Sync:
         self.playlistCopier = Playlist.Copier(self.config, self.playlistSet)
 
     def copyPlaylists(self):
-        for folder in 'Collections Favourites Setlists Workflow'.split(' '):
+        for folder in ['.']:
             for filename in os.listdir(folder):
                 if 'm3u' in filename:
                     self.playlistCopier.start(folder, filename)
