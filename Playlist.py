@@ -1,6 +1,6 @@
 import unicodedata, urllib.parse, os
 
-class Playlist:
+class Copier:
 
     def __init__(self, config, playlistSet):
         self.config = config
