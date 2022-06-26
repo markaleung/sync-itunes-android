@@ -53,23 +53,31 @@ class Sync:
         self.fileSet |= self.playlistCopier.fileSet
 
     # Clean Up
+    def cleanSong(self, path):
+        if path.lower() not in self.fileSet:
+            try:
+                print(path.lower())
+                if self.config['writeFiles']:
+                    os.remove(path)
+            except Exception:
+                print('failed', path)
+
     def cleanSongs(self):
         for folder in os.walk(self.config['dest']):
             for file in folder[2]:
                 path = (folder[0]+'/'+file).replace('//', '/')
-                if path.lower() not in self.fileSet:
-                    try:
-                        print(path.lower())
-                        os.remove(path)
-                    except Exception:
-                        print('failed', path)
+                self.cleanSong(path)
+
+    def cleanFolder(self, folder):
+        if folder[1:] == ([], []):
+            if self.config['writeFiles']:
+                os.rmdir(folder[0])
+            print(folder[0])
 
     def cleanFolders(self):
         for i in range(2):
             for folder in os.walk(self.config['dest']):
-                if folder[1:] == ([], []):
-                    os.rmdir(folder[0])
-                    print(folder[0])
+                self.cleanFolder(folder)
 
     # Check Files
     def checkFiles(self):
