@@ -1,6 +1,5 @@
-import os, time, unicodedata, tqdm
+import os
 import Sync
-from io import open
 
 os.chdir(os.path.dirname(__file__))
 

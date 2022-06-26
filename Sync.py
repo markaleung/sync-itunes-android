@@ -12,6 +12,7 @@ class Sync:
         with open(self.config['playlist'], encoding = 'utf-8') as file:
             self.playlistMain = file.read()
 
+    # Songs
     def preCopySongs(self):
         # File list for copying songs, exclude blank lines and comments
         self.fileList = [l.strip().split('/') for l in self.playlistMain.split('\n') if len(l) > 0 and l[0] != '#']
@@ -30,6 +31,7 @@ class Sync:
         self.fileSet |= self.songCopier.fileSet
         print(len(self.fileSet))
 
+    # Playlists
     def preCopyPlaylists(self):
         # Get source folder for Playlist
         self.config['source'] = '/'.join(self.fileList[0][:-3])+'/'
@@ -50,6 +52,7 @@ class Sync:
                     self.playlistCopier.write()
         self.fileSet |= self.playlistCopier.fileSet
 
+    # Clean Up
     def cleanSongs(self):
         for folder in os.walk(self.config['dest']):
             for file in folder[2]:
@@ -68,6 +71,7 @@ class Sync:
                     os.rmdir(folder[0])
                     print(folder[0])
 
+    # Check Files
     def checkFiles(self):
         files = [file for path in os.walk(self.config['dest']) for file in path[2]]
         assert len(self.fileSet) == len(files)

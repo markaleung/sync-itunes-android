@@ -1,4 +1,4 @@
-import os, filecmp, time, shutil, unicodedata
+import os, filecmp, shutil, unicodedata
 
 class Copier:
 
