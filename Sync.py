@@ -29,7 +29,6 @@ class Sync:
                 self.songCopier.mkdir()
                 self.songCopier.copy()
         self.fileSet |= self.songCopier.fileSet
-        print(len(self.fileSet))
 
     # Playlists
     def preCopyPlaylists(self):
@@ -55,12 +54,9 @@ class Sync:
     # Clean Up
     def cleanSong(self, path):
         if path.lower() not in self.fileSet:
-            try:
-                print(path.lower())
-                if self.config['writeFiles']:
-                    os.remove(path)
-            except Exception:
-                print('failed', path)
+            print(path.lower())
+            if self.config['writeFiles']:
+                os.remove(path)
 
     def cleanSongs(self):
         for folder in os.walk(self.config['dest']):
