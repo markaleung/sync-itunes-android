@@ -102,3 +102,6 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+*.m3u
+sync-itunes-android-mark.py
