@@ -4,7 +4,7 @@ import Song, Playlist
 
 class Sync:
 
-    def __init__(self, config):
+    def __init__(self, config: dict):
         self.config = config
         self.fileSet = set()
 
@@ -52,7 +52,7 @@ class Sync:
         self.fileSet |= self.playlistCopier.fileSet
 
     # Clean Up
-    def cleanSong(self, path):
+    def cleanSong(self, path: str):
         if path.lower() not in self.fileSet:
             print(path.lower())
             if self.config['writeFiles']:
@@ -64,7 +64,7 @@ class Sync:
                 path = (folder[0]+'/'+file).replace('//', '/')
                 self.cleanSong(path)
 
-    def cleanFolder(self, folder):
+    def cleanFolder(self, folder: tuple):
         if folder[1:] == ([], []):
             if self.config['writeFiles']:
                 os.rmdir(folder[0])

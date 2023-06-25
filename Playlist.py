@@ -2,7 +2,7 @@ import unicodedata, urllib.parse, os
 
 class Copier:
 
-    def __init__(self, config, playlistSet):
+    def __init__(self, config: dict, playlistSet: set):
         self.config = config
         self.playlistSet = playlistSet
         self.fileSet = set()
