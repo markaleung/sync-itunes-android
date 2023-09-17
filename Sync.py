@@ -25,7 +25,7 @@ class Sync:
         for i, path in self.iterator:
             self.songCopier.start(i, path)
             self.songCopier.makePaths()
-            if self.config['writeFiles'] and self.songCopier.check():
+            if self.songCopier.check():
                 self.songCopier.mkdir()
                 self.songCopier.copy()
         self.fileSet |= self.songCopier.fileSet

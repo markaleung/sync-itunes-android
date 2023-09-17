@@ -30,14 +30,16 @@ class Copier:
 
     def mkdir(self):
         # Excludes the last item i.e. the file
-        path = self.path[-3:]
-        for i in range(len(path)):
-            p = self.config['dest'] + '/'.join(path[:i])
-            if not os.path.exists(p):
-                os.mkdir(p)
+        if self.config['writeFiles']:
+            path = self.path[-3:]
+            for i in range(len(path)):
+                p = self.config['dest'] + '/'.join(path[:i])
+                if not os.path.exists(p):
+                    os.mkdir(p)
 
     def copy(self):
         # Copy File
         if self.config['printUpdates']:
             print(self.i, self.short)
-        shutil.copy2(self.source, self.dest)
+        if self.config['writeFiles']:
+            shutil.copy2(self.source, self.dest)
