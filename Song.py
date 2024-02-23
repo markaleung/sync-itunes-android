@@ -18,10 +18,10 @@ class Copier:
         self.dest = self.config['dest'] + self.short
         # Fat32 and EXFAT can't handle composed unicode characters, must be decomposed
         self.dest = unicodedata.normalize('NFD', self.dest) if os.path.exists('/Volumes/SD Card/') else self.dest
+        # Keep track of files, even when not writing
+        self.fileSet.add(self.dest.lower())
 
     def check(self):
-        # Keep track of files
-        self.fileSet.add(self.dest.lower())
         return not os.path.exists(self.dest) or (
             self.config['checkContents'] and
             # File contents have changed
