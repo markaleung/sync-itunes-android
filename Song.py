@@ -5,11 +5,6 @@ class Copier:
     def __init__(self, config: dict):
         self.config = config
         self.fileSet = set()
-
-    def start(self, i, path):
-        self.i = i
-        self.path = path        
-
     def makePaths(self):
         # Make Source and Destination Names
         self.source = '/'.join(self.path)
@@ -20,14 +15,12 @@ class Copier:
         self.dest = unicodedata.normalize('NFD', self.dest) if os.path.exists('/Volumes/SD Card/') else self.dest
         # Keep track of files, even when not writing
         self.fileSet.add(self.dest.lower())
-
     def check(self):
         return not os.path.exists(self.dest) or (
             self.config['checkContents'] and
             # File contents have changed
             not filecmp.cmp(self.source, self.dest)
         )
-
     def mkdir(self):
         # Excludes the last item i.e. the file
         if self.config['writeFiles']:
@@ -36,10 +29,16 @@ class Copier:
                 p = self.config['dest'] + '/'.join(path[:i])
                 if not os.path.exists(p):
                     os.mkdir(p)
-
     def copy(self):
         # Copy File
         if self.config['printUpdates']:
             print(self.i, self.short)
         if self.config['writeFiles']:
             shutil.copy2(self.source, self.dest)
+    def main(self, i, path):
+        self.i = i
+        self.path = path        
+        self.makePaths()
+        if self.check():
+            self.mkdir()
+            self.copy()

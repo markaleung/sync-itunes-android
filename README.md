@@ -13,3 +13,21 @@
 	- All other playlist files will be copied to the folder so that you can use them in your music player, but only the specified playlist file is used to determine which songs will be synced. 
 - Run the script using the terminal. 
 	- Change directory to the folder containing the script, and type **python sync-itunes-android.py**. 
+
+# Function Tree
+- Sync.readPlaylist()
+	- open()
+- Sync.preCopySongs()
+	- Song.Copier()
+- Sync.copySongs()
+	- for i, path in iterator:
+		- Song.Copier.start()
+		- Song.Copier.makePaths()
+		- Song.Copier.check()
+		- Song.Copier.mkdir()
+		- Song.Copier.copy()
+- Sync.preCopyPlaylists()
+- Sync.copyPlaylists()
+- Sync.cleanSongs()    
+- Sync.cleanFolders()
+- Sync.checkFiles()
