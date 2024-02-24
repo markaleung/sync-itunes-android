@@ -35,11 +35,7 @@ class Sync:
         for folder in self.config['playlistFolders']:
             for filename in os.listdir(folder):
                 if 'm3u' in filename:
-                    self.playlistCopier.start(folder, filename)
-                    self.playlistCopier.read()
-                    self.playlistCopier.getContents()
-                    self.playlistCopier.getFilename()
-                    self.playlistCopier.write()
+                    self.playlistCopier.main(folder, filename)
         self.fileSet |= self.playlistCopier.fileSet
     # Clean Up
     def cleanSong(self, path: str):

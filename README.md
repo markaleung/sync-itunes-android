@@ -18,15 +18,19 @@
 - Sync.readPlaylist()
 	- open()
 - Sync.preCopySongs()
-	- Song.Copier()
 - Sync.copySongs()
 	- for i, path in iterator:
-		- Song.Copier.start()
 		- Song.Copier.makePaths()
 		- Song.Copier.check()
 		- Song.Copier.mkdir()
 		- Song.Copier.copy()
 - Sync.preCopyPlaylists()
+	- for folder in config['playlistFolders']:
+		- for filename in os.listdir(folder):
+			- Playlist.Copier.read()
+			- Playlist.Copier.getContents()
+			- Playlist.Copier.getFilename()
+			- Playlist.Copier.write()
 - Sync.copyPlaylists()
 - Sync.cleanSongs()    
 - Sync.cleanFolders()
