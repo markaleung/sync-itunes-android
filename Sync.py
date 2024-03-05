@@ -19,15 +19,9 @@ class Sync:
     def cleanSongs(self):
         self.song_cleaner = Cleaner.Song(config = self.config)
         self.song_cleaner.main()
-    def cleanFolder(self, folder: tuple):
-        if folder[1:] == ([], []):
-            if self.config.write_files:
-                os.rmdir(folder[0])
-            print(folder[0])
     def cleanFolders(self):
-        for i in range(2):
-            for folder in os.walk(self.config.dest):
-                self.cleanFolder(folder)
+        self.folder_cleaner = Cleaner.Folder(config = self.config)
+        self.folder_cleaner.main()
     # Check Files
     def checkFiles(self):
         files = [file for path in os.walk(self.config.dest) for file in path[2]]
