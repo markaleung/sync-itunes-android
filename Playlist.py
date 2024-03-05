@@ -4,7 +4,6 @@ class Copier:
     def __init__(self, config, playlistSet: set):
         self.config = config
         self.playlistSet = playlistSet
-        self.fileSet = set()
     def read(self):
         # Read
         with open(self.folder+'/'+self.filename, encoding = 'utf-8') as file:
@@ -24,7 +23,7 @@ class Copier:
     def getFilename(self):
         # Make New Filename
         self.filename = f'{self.config.dest}{self.folder} {self.filename}8'
-        self.fileSet.add(self.filename.lower())
+        self.config.file_set.add(self.filename.lower())
         # Print New Playlists
         if not os.path.exists(self.filename) and self.config.print_updates:
             print(self.filename)

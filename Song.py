@@ -4,7 +4,6 @@ class Copier:
 
     def __init__(self, config):
         self.config = config
-        self.fileSet = set()
     def makePaths(self):
         # Make Source and Destination Names
         self.source = '/'.join(self.path)
@@ -14,7 +13,7 @@ class Copier:
         # Fat32 and EXFAT can't handle composed unicode characters, must be decomposed
         self.dest = unicodedata.normalize('NFD', self.dest) if os.path.exists('/Volumes/SD Card/') else self.dest
         # Keep track of files, even when not writing
-        self.fileSet.add(self.dest.lower())
+        self.config.file_set.add(self.dest.lower())
     def check(self):
         return not os.path.exists(self.dest) or (
             self.config.check_contents and
