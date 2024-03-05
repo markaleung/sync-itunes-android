@@ -9,25 +9,17 @@ class Sync:
         self.fileSet = set()
     def readPlaylist(self):
         with open(self.config.playlist, encoding = 'utf-8') as file:
-            self.playlistMain = file.read()
-    # Songs
-    def preCopySongs(self):
-        # File list for copying songs, exclude blank lines and comments
-        self.fileList = [l.strip().split('/') for l in self.playlistMain.split('\n') if len(l) > 0 and l[0] != '#']
-        # Enumerate and add progress bar
-        self.iterator = tqdm.tqdm(enumerate(self.fileList), total = len(self.fileList))
-        # Start Songs
-        self.songCopier = Song.Copier(self.config)        
+            self.config.playlistMain = file.read()
     def copySongs(self):
-        for i, path in self.iterator:
-            self.songCopier.main(i, path)
-        self.fileSet |= self.songCopier.fileSet
+        self.songs = Song.Manager(config = self.config)
+        self.songs.main()
+        self.fileSet |= self.songs.songCopier.fileSet
     # Playlists
     def preCopyPlaylists(self):
         # Get source folder for Playlist
-        self.config.source = '/'.join(self.fileList[0][:-3])+'/'
+        self.config.source = '/'.join(self.config.fileList[0][:-3])+'/'
         # Playlist set for copying playlists
-        playlistMain = unicodedata.normalize('NFC', self.playlistMain)
+        playlistMain = unicodedata.normalize('NFC', self.config.playlistMain)
         self.playlistSet = {l.strip() for l in playlistMain.split('\n#')}
         # Start Playlist
         self.playlistCopier = Playlist.Copier(self.config, self.playlistSet)
@@ -65,7 +57,6 @@ class Sync:
     def main(self):
         self.readPlaylist()
         # Songs
-        self.preCopySongs()
         self.copySongs()
         # Playlists
         self.preCopyPlaylists()

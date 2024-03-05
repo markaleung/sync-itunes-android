@@ -1,8 +1,8 @@
-import os, filecmp, shutil, unicodedata
+import os, filecmp, shutil, unicodedata, tqdm
 
 class Copier:
 
-    def __init__(self, config: dict):
+    def __init__(self, config):
         self.config = config
         self.fileSet = set()
     def makePaths(self):
@@ -42,3 +42,20 @@ class Copier:
         if self.check():
             self.mkdir()
             self.copy()
+
+class Manager:
+    def __init__(self, config):
+        self.config = config
+    def preCopySongs(self):
+        # File list for copying songs, exclude blank lines and comments
+        self.config.fileList = [l.strip().split('/') for l in self.config.playlistMain.split('\n') if len(l) > 0 and l[0] != '#']
+        # Enumerate and add progress bar
+        self.iterator = tqdm.tqdm(enumerate(self.config.fileList), total = len(self.config.fileList))
+    def copySongs(self):
+        # Start Songs
+        self.songCopier = Copier(self.config)        
+        for i, path in self.iterator:
+            self.songCopier.main(i, path)
+    def main(self):
+        self.preCopySongs()
+        self.copySongs()
