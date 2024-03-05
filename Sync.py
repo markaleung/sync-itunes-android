@@ -4,11 +4,11 @@ import Song, Playlist
 
 class Sync:
 
-    def __init__(self, config: dict):
+    def __init__(self, config):
         self.config = config
         self.fileSet = set()
     def readPlaylist(self):
-        with open(self.config['playlist'], encoding = 'utf-8') as file:
+        with open(self.config.playlist, encoding = 'utf-8') as file:
             self.playlistMain = file.read()
     # Songs
     def preCopySongs(self):
@@ -25,14 +25,14 @@ class Sync:
     # Playlists
     def preCopyPlaylists(self):
         # Get source folder for Playlist
-        self.config['source'] = '/'.join(self.fileList[0][:-3])+'/'
+        self.config.source = '/'.join(self.fileList[0][:-3])+'/'
         # Playlist set for copying playlists
         playlistMain = unicodedata.normalize('NFC', self.playlistMain)
         self.playlistSet = {l.strip() for l in playlistMain.split('\n#')}
         # Start Playlist
         self.playlistCopier = Playlist.Copier(self.config, self.playlistSet)
     def copyPlaylists(self):
-        for folder in self.config['playlistFolders']:
+        for folder in self.config.playlist_folders:
             for filename in os.listdir(folder):
                 if 'm3u' in filename:
                     self.playlistCopier.main(folder, filename)
@@ -41,25 +41,25 @@ class Sync:
     def cleanSong(self, path: str):
         if path.lower() not in self.fileSet:
             print(path.lower())
-            if self.config['writeFiles']:
+            if self.config.write_files:
                 os.remove(path)
     def cleanSongs(self):
-        for folder in os.walk(self.config['dest']):
+        for folder in os.walk(self.config.dest):
             for file in folder[2]:
                 path = (folder[0]+'/'+file).replace('//', '/')
                 self.cleanSong(path)
     def cleanFolder(self, folder: tuple):
         if folder[1:] == ([], []):
-            if self.config['writeFiles']:
+            if self.config.write_files:
                 os.rmdir(folder[0])
             print(folder[0])
     def cleanFolders(self):
         for i in range(2):
-            for folder in os.walk(self.config['dest']):
+            for folder in os.walk(self.config.dest):
                 self.cleanFolder(folder)
     # Check Files
     def checkFiles(self):
-        files = [file for path in os.walk(self.config['dest']) for file in path[2]]
+        files = [file for path in os.walk(self.config.dest) for file in path[2]]
         assert len(self.fileSet) == len(files)
         print(len(self.fileSet), len(files))
     def main(self):

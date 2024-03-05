@@ -1,7 +1,7 @@
 import unicodedata, urllib.parse, os
 
 class Copier:
-    def __init__(self, config: dict, playlistSet: set):
+    def __init__(self, config, playlistSet: set):
         self.config = config
         self.playlistSet = playlistSet
         self.fileSet = set()
@@ -19,14 +19,14 @@ class Copier:
         '''
         self.data = unicodedata.normalize('NFC', self.data)
         self.data = '\n#'.join([l.strip() for l in self.data.split('\n#') if l.strip() in self.playlistSet])
-        self.data = self.data.replace(self.config['source'], '')
+        self.data = self.data.replace(self.config.source, '')
         self.data = '\n'.join([line if line and line[0] == '#' else urllib.parse.quote(line) for line in self.data.split('\n')])
     def getFilename(self):
         # Make New Filename
-        self.filename = f'{self.config["dest"]}{self.folder} {self.filename}8'
+        self.filename = f'{self.config.dest}{self.folder} {self.filename}8'
         self.fileSet.add(self.filename.lower())
         # Print New Playlists
-        if not os.path.exists(self.filename) and self.config['printUpdates']:
+        if not os.path.exists(self.filename) and self.config.print_updates:
             print(self.filename)
     def write(self):
         # Write Out
