@@ -14,21 +14,10 @@ class Sync:
         self.songs = Song.Manager(config = self.config)
         self.songs.main()
         self.fileSet |= self.songs.songCopier.fileSet
-    # Playlists
-    def preCopyPlaylists(self):
-        # Get source folder for Playlist
-        self.config.source = '/'.join(self.config.fileList[0][:-3])+'/'
-        # Playlist set for copying playlists
-        playlistMain = unicodedata.normalize('NFC', self.config.playlistMain)
-        self.playlistSet = {l.strip() for l in playlistMain.split('\n#')}
-        # Start Playlist
-        self.playlistCopier = Playlist.Copier(self.config, self.playlistSet)
     def copyPlaylists(self):
-        for folder in self.config.playlist_folders:
-            for filename in os.listdir(folder):
-                if 'm3u' in filename:
-                    self.playlistCopier.main(folder, filename)
-        self.fileSet |= self.playlistCopier.fileSet
+        self.playlists = Playlist.Manager(config = self.config)
+        self.playlists.main()
+        self.fileSet |= self.playlists.playlistCopier.fileSet
     # Clean Up
     def cleanSong(self, path: str):
         if path.lower() not in self.fileSet:
@@ -59,7 +48,6 @@ class Sync:
         # Songs
         self.copySongs()
         # Playlists
-        self.preCopyPlaylists()
         self.copyPlaylists()
         # Clean Up
         self.cleanSongs()    

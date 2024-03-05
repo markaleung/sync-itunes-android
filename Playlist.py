@@ -39,3 +39,24 @@ class Copier:
         self.getContents()
         self.getFilename()
         self.write()
+
+class Manager:
+    def __init__(self, config):
+        self.config = config
+    def preCopyPlaylists(self):
+        # Get source folder for Playlist
+        self.config.source = '/'.join(self.config.fileList[0][:-3])+'/'
+        # Playlist set for copying playlists
+        playlistMain = unicodedata.normalize('NFC', self.config.playlistMain)
+        self.playlistSet = {l.strip() for l in playlistMain.split('\n#')}
+        # Start Playlist
+        self.playlistCopier = Copier(self.config, self.playlistSet)
+    def copyPlaylists(self):
+        for folder in self.config.playlist_folders:
+            for filename in os.listdir(folder):
+                if 'm3u' in filename:
+                    self.playlistCopier.main(folder, filename)
+    def main(self):
+        self.preCopyPlaylists()
+        self.copyPlaylists()
+        
