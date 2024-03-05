@@ -46,8 +46,8 @@ class Manager:
         # Get source folder for Playlist
         self.config.source = '/'.join(self.config.fileList[0][:-3])+'/'
         # Playlist set for copying playlists
-        playlistMain = unicodedata.normalize('NFC', self.config.playlistMain)
-        self.playlistSet = {l.strip() for l in playlistMain.split('\n#')}
+        self.playlistMain = unicodedata.normalize('NFC', self.config.playlistMain)
+        self.playlistSet = {l.strip() for l in self.playlistMain.split('\n#')}
         # Start Playlist
         self.playlistCopier = Copier(self.config, self.playlistSet)
     def copyPlaylists(self):

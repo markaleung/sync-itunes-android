@@ -10,5 +10,6 @@ class Config:
         self.playlist_folders = ['.']
         self.dest = '/Volumes/SD Card/Music/'
         self.playlist = 'My Playlist.m3u'
+        self.file_set = set()
     def _set_updates(self):
         self.print_updates = os.path.exists(self.dest)
